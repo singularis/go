@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 
@@ -131,8 +132,23 @@ func redisClient_test(rdb *redis.Client) {
 
 }
 
+func loadFile(fileName string) (string, error) {
+	bytes, err := os.ReadFile(fileName)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
+}
+
 func webHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello %s. welcome to Dante server", r.URL.Path[1:])
+	fmt.Printf("%v\n", path.Base(r.URL.EscapedPath()))
+	var html, err = loadFile(path.Base(r.URL.EscapedPath()))
+	if err != nil {
+		w.WriteHeader(404)
+		fmt.Fprint(w, "404 Sorry, please check code")
+	}
+	fmt.Fprint(w, html)
+	//fmt.Fprintf(w, "Hello %s. welcome to Dante server", r.URL.Path[1:])
 }
 
 func main() {
